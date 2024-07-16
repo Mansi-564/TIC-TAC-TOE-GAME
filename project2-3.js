@@ -1,57 +1,74 @@
-const BASE_URL = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/";
+let boxes=document.querySelectorAll(".box");
+let resetbtn = document.querySelector("#reset-btn");
+let newGamebtn = document.querySelector("#new-btn");
+let msgContainer = document.querySelector(".msg-container");
+let msg= document.querySelector("#msg");
 
-const dropdown = document.querySelectorAll(".dropdown select");
-const btn = document.querySelector("form button");
-const fromCurr = document.querySelector(".from select");
-const toCurr = document.querySelector(".to select");
-const msg = document.querySelector(".msg");
+let turn0 = true;
+const winPattern=[
+    [0,1,2],
+    [0,3,6],
+    [0,4,8],
+    [1,4,7],
+    [2,5,8],
+    [2,4,6],
+    [3,4,5],
+    [6,7,8],
+];
+const resetGame =() => {
+  turn0 = true;
+  enableBoxes();
+  msgContainer.classList.add("hide");
 
-/*for (code in countryList){
-    console.log(code, countryList[code]);
-}*/
-for(let select of dropdown){
-    for(currCode in countryList){
-        let newOption = document.createElement("option");
-        newOption.innerText = currCode;
-        newOption.value = currCode;
-        if(select.name==="from"&& currCode==="USD"){
-           newOption.selected="selected"; 
-        }else if(select.name==="to"&& currCode==="INR"){
-            newOption.selected="selected"; 
-         }
-        select.append(newOption);
-    }
-    select.addEventListener("change",(evt)=> {
-        updateFlag(evt.target);
-    });
-}
-const updateExchangeRate = async () => {
-    let amount = document.querySelector(".amount input");
-    let amtVal = amount.value;
-    if (amtVal === "" || amtVal < 1) {
-      amtVal = 1;
-      amount.value = "1";
-    }
-    const URL = `${BASE_URL}/${fromCurr.value.toLowerCase()}/${toCurr.value.toLowerCase()}.json`;
-  let response = await fetch(URL);
-        let data = await respond.json()
-        let rate = data[toCurr.value.toLowerCase()];
-        let Finalamount = amtVal * rate;
-        msg.innerText = `${amtVal} ${fromCurr.value} = ${Finalamount} ${toCurr.value}`;
-    };
-
-const updateFlag = (element)=>{
-    let currCode = element.value;
-let countryCode = countryList[currCode];
-let newSrc = `https://flagsapi.com/${countryCode}/flat/64.png`;
-let img = element.parentElement.querySelector("img");
-img.src = newSrc;
 };
 
-btn.addEventListener("click",(evt)=>{
-    evt.preventDefault();
-    updateExchangeRate();
+boxes.forEach((box)=>{
+    box.addEventListener("click",()=> {
+        
+          if(turn0){
+            box.innerText ="0";
+            turn0 =false;
+          }else{
+            box.innerText="X";
+            turn0 = true;
+          }
+          box.disabled =true;
+
+          checkWinner();
+    });
 });
-window.addEventListener("load",()=>{
-    updateExchangeRate();
-});
+ const disableBoxes = ()=>{
+  for(let box of boxes){
+    box.disabled = true;
+  }
+ };
+ const enableBoxes = ()=> {
+  for(let box of boxes){
+    box.disabled = false;
+    box.innerText ="";
+  }
+ };
+const showWinner = (winner)=> {
+       msg.innerText= `Congratulation , Winnner is ${winner} `;
+       msgContainer.classList.remove("hide");
+       disableBoxes();
+}
+const checkWinner =() => {
+    for(let pattern of winPattern){
+      //console.log(pattern[0], pattern[1], pattern[2]);
+       // console.log(boxes[pattern[0]], boxes[pattern[1]], boxes[pattern[2]]);
+
+       let pos1val = boxes[pattern[0]].innerText;
+       let pos2val = boxes[pattern[1]].innerText;
+       let pos3val=boxes[pattern[2]].innerText;
+
+       if(pos1val !="" && pos2val!=""&& pos3val!=""){
+        if(pos1val===pos2val && pos2val===pos3val){
+          console.log("winner",pos1val);
+          showWinner(pos1val);
+        }
+       }
+    }
+};
+newGamebtn.addEventListener("click",resetGame);
+resetbtn.addEventListener("click",resetGame);
